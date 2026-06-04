@@ -1,2 +1,17 @@
 .env
 node_modules
+
+
+/* ---- admin -----
+  "email": "influencer3721@gmail.com",
+  "password": "Password123",
+
+  ---- buyer  ---
+  "email": "pathminirh6@gmail.com",
+  "password": "Password123",
+
+  
+   ---- seller ----
+  "email": "pathminirh26@gmail.com",
+  "password": "Password123",
+  */

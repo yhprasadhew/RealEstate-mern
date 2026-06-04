@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import http from "http";
 import { connectDB } from "./config/db.js";
 import authRouter from "./routes/auth.routes.js";
+import userRouter from "./routes/user.routes.js";
 
 //.. Load environment variables
 dotenv.config();
@@ -20,7 +21,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRouter);
-
+app.use ("/api/user", userRouter)
 
 app.get("/", (req, res) => {
   res.send("API is running...");
@@ -38,8 +39,3 @@ server.listen(PORT, () => {
 
 
 
-
-//{
-  //"name": "pasan",
-  //"email": "yhprasadhew@gmail.com",
-  
