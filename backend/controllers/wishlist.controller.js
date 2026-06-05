@@ -1,4 +1,5 @@
-import Wishlist from "../models/wishlist.model.js";
+import Wishlist from "../models/wishlist.models.js";
+
 
 // Add property to wishlist
 export const addWishlist = async (req, res) => {

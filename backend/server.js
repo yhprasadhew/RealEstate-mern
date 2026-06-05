@@ -7,6 +7,7 @@ import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
 import propertyRouter from "./routes/property.route.js";
 import inquiryRouter from "./routes/inquiry.routes.js";
+import wishlistRouter from "./routes/wishlist.route.js";
 
 //.. Load environment variables
 dotenv.config();
@@ -26,6 +27,7 @@ app.use("/api/auth", authRouter);
 app.use ("/api/user", userRouter);
 app.use ("/api/property", propertyRouter);
 app.use("/api/inquiry", inquiryRouter);
+app.use ("/api/wishlist" , wishlistRouter);
 
 app.get("/", (req, res) => {
   res.send("API is running...");

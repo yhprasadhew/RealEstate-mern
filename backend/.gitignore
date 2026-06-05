@@ -3,19 +3,25 @@ node_modules
 
 
 /* ---- admin -----
-  "email": "influencer3721@gmail.com",
-  "password": "Password123",
+ { "email": "influencer3721@gmail.com",
+  "password": "Password123"
+  }
 
   ---- buyer  ---
-  "email": "pathminirh6@gmail.com",
-  "password": "Password123",
+ { "email": "pathminirh6@gmail.com",
+  "password": "Password123"
+  }
 
   ==buyer ===
+  {
   "email": "prasadnewlif@gmail.com ",
   "password" : "pusith123"
+  }
 
   
    ---- seller ----
-  "email": "pathminirh26@gmail.com",
-  "password": "Password123",
+ 
+ { "email": "pathminirh26@gmail.com",
+  "password": "Password123"
+  }
   */
