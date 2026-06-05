@@ -25,7 +25,7 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use ("/api/user", userRouter);
 app.use ("/api/property", propertyRouter);
-app.use("/api/inquiries", inquiryRouter);
+app.use("/api/inquiry", inquiryRouter);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
