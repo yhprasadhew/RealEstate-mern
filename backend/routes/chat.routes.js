@@ -238,5 +238,52 @@ chatRouter.delete("/:chatId", async (req, res) => {
     });
   }
 });
+// to delete specific message
+chatRouter.delete("/:chatId/message/:messageId", async (req, res) => {
+  try {
+    const { chatId, messageId } = req.params;
+
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+
+    const message = chat.messages.id(messageId);
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: "Message not found",
+      });
+    }
+
+    // Only sender can delete
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete your own messages",
+      });
+    }
+
+    message.deleteOne();
+
+    await chat.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Message deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error deleting message",
+      error: err.message,
+    });
+  }
+});
 
 export default chatRouter;
