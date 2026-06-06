@@ -37,7 +37,7 @@ const SendEmail = async (options) => {
     const result = await response.json();
 
     if (!response.ok) {
-        console.error("Brevo Error:", result);
+        console.error("Brevo Error:", error.message);
         throw new Error(result.message || "Failed to send email.");
     }
 
