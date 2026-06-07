@@ -1,24 +1,196 @@
-import React, { createContext, useState, useContext } from "react";
-import axios from 'axios'; // terminal eke npm i
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import API_URL from "../config";
 
-// 1. Create the Context
-const AuthContext = createContext();
+// Create a dedicated Axios instance to prevent global interceptor pollution
+export const api = axios.create({
+  baseURL: API_URL,
+});
 
-// 2. Create the Provider Component
+const AuthContext = createContext(null);
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(
-    localStorage.getItem("token") || sessionStorage.getItem("token") || null
-  );
+  const navigate = useNavigate();
 
-  // You can pass user, token, setUser, and setToken down to any child component
+  // =====================================
+  // Lazy State Initializer
+  // =====================================
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem("token") || sessionStorage.getItem("token") || null;
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  // =====================================
+  // Helper: Sync Credentials to Storage & Instance
+  // =====================================
+  const syncAuthCredentials = useCallback((resToken, resUser, rememberMe = true) => {
+    setToken(resToken);
+    setUser(resUser);
+
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem("token", resToken);
+    storage.setItem("user", JSON.stringify(resUser));
+
+    api.defaults.headers.common["Authorization"] = `Bearer ${resToken}`;
+  }, []);
+
+  // =====================================
+  // Action: Logout
+  // =====================================
+  const logout = useCallback(() => {
+    setUser(null);
+    setToken(null);
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+
+    delete api.defaults.headers.common["Authorization"];
+    navigate("/login");
+  }, [navigate]);
+
+  // =====================================
+  // Sync Initialization Instance Headers
+  // =====================================
+  useEffect(() => {
+    if (token) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete api.defaults.headers.common["Authorization"];
+    }
+    setLoading(false);
+  }, [token]);
+
+  // =====================================
+  // Interceptor: Auto Logout on 403 Blocked
+  // =====================================
+  useEffect(() => {
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (
+          error.response?.status === 403 &&
+          error.response.data?.message?.toLowerCase().includes("blocked")
+        ) {
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      api.interceptors.response.eject(interceptor);
+    };
+  }, [logout]);
+
+  // =====================================
+  // Action: Login
+  // =====================================
+  const login = useCallback(async (email, password, rememberMe = true) => {
+    try {
+      const res = await api.post("/api/auth/login", { email, password });
+      const { token: resToken, user: resUser } = res.data;
+
+      syncAuthCredentials(resToken, resUser, rememberMe);
+
+      return { success: true, user: resUser };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Login failed",
+      };
+    }
+  }, [syncAuthCredentials]);
+
+  // =====================================
+  // Action: Register
+  // =====================================
+  const register = useCallback(async (userData, rememberMe = true) => {
+    try {
+      const res = await api.post("/api/auth/register", userData);
+      const { token: resToken, user: resUser } = res.data;
+
+      syncAuthCredentials(resToken, resUser, rememberMe);
+
+      return { success: true, user: resUser };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Registration failed",
+      };
+    }
+  }, [syncAuthCredentials]);
+
+  // =====================================
+  // Action: Refresh User Profile
+  // =====================================
+  const refreshUser = useCallback(async () => {
+    // Read directly from storage or current scope to prevent state desync stale closures
+    const currentToken = token || localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!currentToken) return { success: false, message: "No token available" };
+
+    try {
+      const res = await api.get("/api/auth/me", {
+        headers: { Authorization: `Bearer ${currentToken}` },
+      });
+      const updatedUser = res.data.user;
+
+      setUser(updatedUser);
+      
+      const storage = localStorage.getItem("token") ? localStorage : sessionStorage;
+      storage.setItem("user", JSON.stringify(updatedUser));
+
+      return { success: true, user: updatedUser };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to refresh user",
+      };
+    }
+  }, [token]);
+
+  // =====================================
+  // Value Payload Memoization
+  // =====================================
+  const contextValue = useMemo(() => ({
+    user,
+    token,
+    loading,
+    login,
+    register,
+    logout,
+    refreshUser,
+    setUser,
+    setToken,
+    isAuthenticated: !!token,
+  }), [user, token, loading, login, register, logout, refreshUser]);
+
   return (
-    <AuthContext.Provider value={{ user, setUser, token, setToken }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// 3. Custom hook to use the Auth context
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
