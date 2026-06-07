@@ -1188,8 +1188,9 @@ export const sellerSidebarStyles = {
 
 export const logoStyles = {
   link: "font-bold text-primary flex items-center gap-3 no-underline whitespace-nowrap",
-  iconWrapper: "bg-primary text-white p-2 rounded-[10px] flex items-center justify-center shadow-[0_4px_12px_rgba(13,110,89,0.2)]",
-  text: "tracking-[-0.02em] text-[#0d6e59] font-extrabold",
+  iconWrapper: "bg-primary text-white p-3 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(16,185,129,0.25)]",
+  logoImage: "w-10 h-10 object-contain",
+  text: "tracking-[-0.02em] text-[var(--secondary)] font-extrabold",
 };
 
 export const navbarStyles = {
