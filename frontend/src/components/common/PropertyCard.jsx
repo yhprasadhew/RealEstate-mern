@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiHeart, HiOutlineHeart, HiLocationMarker, HiEye } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
 
 const PropertyCard = ({ property, renderActions, isWishlisted, onToggleWishlist }) => {
-  if (!property) return null;
-
   const { user } = useAuth();
   const navigate = useNavigate();
   const [imgLoaded, setImgLoaded] = useState(false);
+
+  if (!property) return null;
 
   const handleWishlistClick = (e) => {
     e.preventDefault();
