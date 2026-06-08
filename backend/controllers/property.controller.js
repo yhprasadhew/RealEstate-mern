@@ -301,9 +301,14 @@ export const getAllProperties = async (req, res) => {
     if (sort === "priceHigh") sortOption = { price: -1 };
     if (sort === "latest") sortOption = { createdAt: -1 };
 
-    const properties = await Property.find(query)
-      .populate("seller", "name phone profilePic")
-      .sort(sortOption);
+    const queryBuilder = Property.find(query).populate("seller", "name phone profilePic").sort(sortOption);
+
+    const limitNum = parseInt(req.query.limit, 10);
+    if (!isNaN(limitNum) && limitNum > 0) {
+      queryBuilder.limit(limitNum);
+    }
+
+    const properties = await queryBuilder;
 
     res.json({
       success: true,
