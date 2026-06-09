@@ -148,7 +148,6 @@ function ActiveFilters({ filters, onRemove, onClearAll }) {
   if (filters.bhk) pills.push({ key: "bhk", label: `🛏 ${filters.bhk} BHK` });
   if (filters.minPrice) pills.push({ key: "minPrice", label: `Min ₹${filters.minPrice}Mn` });
   if (filters.maxPrice) pills.push({ key: "maxPrice", label: `Max ₹${filters.maxPrice}Mn` });
-  filters.furnishing.forEach((f) => pills.push({ key: `furn:${f}`, label: `✨ ${f}` }));
 
   if (!pills.length) return null;
   return (
@@ -186,36 +185,6 @@ function BHKSelector({ value, onChange }) {
           {o}
         </button>
       ))}
-    </div>
-  );
-}
-
-/* ─── Furnishing chip selector ──────────────────────────────────────── */
-function FurnishingSelector({ value, onChange }) {
-  const opts = [
-    { label: "Furnished", value: "furnished" },
-    { label: "Semi", value: "semi-furnished" },
-    { label: "Unfurnished", value: "unfurnished" },
-  ];
-  return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-      {opts.map((o) => {
-        const active = value.includes(o.value);
-        return (
-          <button
-            key={o.value}
-            onClick={() => onChange(active ? value.filter((x) => x !== o.value) : [...value, o.value])}
-            style={{
-              padding: "6px 13px", borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: "pointer", transition: "all .15s",
-              background: active ? "var(--accent)" : "var(--surface)",
-              color: active ? "#fff" : "var(--ink-muted)",
-              border: active ? "1.5px solid var(--accent)" : "1.5px solid var(--border)",
-            }}
-          >
-            {o.label}
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -258,7 +227,7 @@ const Properties = () => {
 
   const [filters, setFilters] = useState({
     city: "", propertyType: [], bhk: "", minPrice: "", maxPrice: "",
-    amenities: [], furnishing: [], sort: "latest",
+    amenities: [], sort: "latest",
   });
 
   const propertyTypes = [
@@ -287,7 +256,10 @@ const Properties = () => {
       setError(null);
       const p = new URLSearchParams();
       if (f.city) p.append("city", f.city);
-      if (f.bhk) p.append("bhk", f.bhk);
+      if (f.bhk) {
+        const bhkValue = f.bhk.endsWith("BHK") || f.bhk === "5+" ? f.bhk : `${f.bhk} BHK`;
+        p.append("bhk", bhkValue);
+      }
       if (f.sort) p.append("sort", f.sort);
       if (f.minPrice) p.append("minPrice", parseFloat(f.minPrice) * 1000000);
       if (f.maxPrice) p.append("maxPrice", parseFloat(f.maxPrice) * 1000000);
@@ -295,7 +267,6 @@ const Properties = () => {
         const map = (v) => ({ flat: "apartment", villa: "house" }[v] || v);
         p.append("propertyType", f.propertyType.map(map).join(","));
       }
-      if (f.furnishing.length) p.append("furnishing", f.furnishing.join(","));
 
       const res = await axios.get(`${API_URL}/api/property?${p.toString()}`);
       const list = res.data?.properties ?? [];
@@ -329,7 +300,7 @@ const Properties = () => {
     const f = {
       city: q.get("city") || "", propertyType: q.get("type") ? [q.get("type")] : [],
       bhk: q.get("bhk") || "", minPrice: q.get("minPrice") || "",
-      maxPrice: q.get("maxPrice") || "", amenities: [], furnishing: [], sort: q.get("sort") || "latest",
+      maxPrice: q.get("maxPrice") || "", amenities: [], sort: q.get("sort") || "latest",
     };
     setFilters(f);
     setSearchCity(f.city);
@@ -355,18 +326,17 @@ const Properties = () => {
     else if (key === "minPrice") u.minPrice = "";
     else if (key === "maxPrice") u.maxPrice = "";
     else if (key.startsWith("type:")) u.propertyType = u.propertyType.filter((x) => `type:${x}` !== key);
-    else if (key.startsWith("furn:")) u.furnishing = u.furnishing.filter((x) => `furn:${x}` !== key);
     setFilters(u); updateURLParams(u);
   };
 
   const clearAllFilters = () => {
-    const u = { city: "", propertyType: [], bhk: "", minPrice: "", maxPrice: "", amenities: [], furnishing: [], sort: filters.sort };
+    const u = { city: "", propertyType: [], bhk: "", minPrice: "", maxPrice: "", amenities: [], sort: filters.sort };
     setFilters(u); setSearchCity(""); updateURLParams(u);
   };
 
   const activeFilterCount = [
     filters.city, filters.bhk, filters.minPrice, filters.maxPrice,
-    ...filters.propertyType, ...filters.furnishing,
+    ...filters.propertyType,
   ].filter(Boolean).length;
 
   /* ── Sidebar filter panel (shared between desktop & mobile sheet) ── */
@@ -473,14 +443,6 @@ const Properties = () => {
             );
           })}
         </div>
-      </FilterSection>
-
-      {/* Furnishing */}
-      <FilterSection title="Furnishing" defaultOpen={false}>
-        <FurnishingSelector
-          value={filters.furnishing}
-          onChange={(v) => { const u = { ...filters, furnishing: v }; setFilters(u); updateURLParams(u); }}
-        />
       </FilterSection>
 
       {activeFilterCount > 0 && (
