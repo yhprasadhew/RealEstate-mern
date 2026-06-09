@@ -9,6 +9,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
+    phone: "", // Added to sync with Mongoose required schema rule
     role: "buyer",
   });
 
@@ -102,7 +103,6 @@ const Register = () => {
               >
                 Full Name
               </label>
-
               <input
                 id="name"
                 type="text"
@@ -123,13 +123,32 @@ const Register = () => {
               >
                 Email Address
               </label>
-
               <input
                 id="email"
                 type="email"
                 name="email"
                 placeholder="Enter your email address"
                 value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Phone Number
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                placeholder="Enter your phone number"
+                value={formData.phone}
                 onChange={handleChange}
                 required
                 className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
@@ -144,7 +163,6 @@ const Register = () => {
               >
                 Password
               </label>
-
               <div className="relative">
                 <input
                   id="password"
@@ -156,11 +174,10 @@ const Register = () => {
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-12 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
                   {showPassword ? (
                     <HiEyeOff size={20} />
@@ -179,13 +196,12 @@ const Register = () => {
               >
                 Register As
               </label>
-
               <select
                 id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
               >
                 <option value="buyer">
                   Buyer - Looking for properties
@@ -200,7 +216,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Creating Account..." : "Create Account"}
             </button>
@@ -218,6 +234,7 @@ const Register = () => {
               </Link>
             </p>
           </div>
+
         </div>
       </div>
     </div>
