@@ -1,67 +1,102 @@
 import User from "../models/user.model.js";
+import PendingRegistration from "../models/pendingRegistration.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import SendEmail from "../utils/sendEmail.js";
 
-// REGISTER USER
+const generateVerificationToken = () =>
+    Math.floor(100000 + Math.random() * 900000).toString();
+
+const sendVerificationEmail = async (recipientEmail, name, verificationToken) => {
+    await SendEmail({
+        email: recipientEmail,
+        subject: "Email Verification - Real Estate App",
+        message: `
+            <h2>Email Verification</h2>
+            <p>Hello ${name},</p>
+            <p>Your verification code is:</p>
+            <h1>${verificationToken}</h1>
+            <p>This code expires in 24 hours.</p>
+        `,
+    });
+};
+
+const logDevVerificationCode = (recipientEmail, verificationToken) => {
+    if (process.env.NODE_ENV !== "production") {
+        console.log(
+            `[DEV] Verification code for ${recipientEmail}: ${verificationToken}`
+        );
+    }
+};
+
+// REGISTER USER (stores pending registration until OTP is verified)
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password, role, phone } = req.body;
 
         if (!name || !email || !password || !phone) {
             return res.status(400).json({
+                success: false,
                 message: "All fields are required",
             });
         }
 
-        const existingUser = await User.findOne({
-            email: email.toLowerCase(),
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const verifiedUser = await User.findOne({
+            email: normalizedEmail,
+            isVerified: true,
         });
 
-        if (existingUser) {
+        if (verifiedUser) {
             return res.status(400).json({
+                success: false,
                 message: "User already exists",
             });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const verificationToken = generateVerificationToken();
 
-        const verificationToken = Math.floor(
-            100000 + Math.random() * 900000
-        ).toString();
+        await PendingRegistration.findOneAndUpdate(
+            { email: normalizedEmail },
+            {
+                name,
+                email: normalizedEmail,
+                password: hashedPassword,
+                role,
+                phone,
+                verificationToken,
+                expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
 
-        const user = await User.create({
-            name,
-            email: email.toLowerCase(),
-            password: hashedPassword,
-            role,
-            phone,
-            verificationToken,
-            isApproved: role === "seller" ? false : true,
-        });
+        let emailSent = true;
 
-        await SendEmail({
-            email: user.email,
-            subject: "Email Verification - Real Estate App",
-            message: `
-                <h2>Email Verification</h2>
-                <p>Hello ${user.name},</p>
-                <p>Your verification code is:</p>
-                <h1>${verificationToken}</h1>
-            `,
-        });
+        try {
+            await sendVerificationEmail(
+                normalizedEmail,
+                name,
+                verificationToken
+            );
+        } catch (emailError) {
+            emailSent = false;
+            console.error("Verification email failed:", emailError.message);
+            logDevVerificationCode(normalizedEmail, verificationToken);
+        }
 
         res.status(201).json({
             success: true,
-            message:
-                "User registered successfully. Please verify your email.",
+            emailSent,
+            message: emailSent
+                ? "Verification code sent. Please verify your email to complete registration."
+                : "Could not send verification email. Use resend code or check the backend console in development.",
             user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                phone: user.phone,
+                name,
+                email: normalizedEmail,
+                role,
+                phone,
             },
         });
     } catch (error) {
@@ -72,47 +107,187 @@ export const registerUser = async (req, res) => {
     }
 };
 
-// VERIFY EMAIL
+// VERIFY EMAIL (creates user only after valid OTP)
 export const verifyEmail = async (req, res) => {
     try {
         const { email, code } = req.body;
 
         if (!email || !code) {
             return res.status(400).json({
+                success: false,
                 message: "Email and verification code are required",
             });
         }
 
-        const user = await User.findOne({
-            email: email.toLowerCase(),
+        const normalizedEmail = email.toLowerCase().trim();
+        const normalizedCode = String(code).trim();
+
+        const pending = await PendingRegistration.findOne({
+            email: normalizedEmail,
         });
 
-        if (!user) {
+        if (pending) {
+            if (pending.verificationToken !== normalizedCode) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid verification code",
+                });
+            }
+
+            const existingUser = await User.findOne({ email: normalizedEmail });
+
+            if (existingUser?.isVerified) {
+                await PendingRegistration.deleteOne({ _id: pending._id });
+                return res.status(400).json({
+                    success: false,
+                    message: "Email already verified. Please log in.",
+                });
+            }
+
+            if (existingUser) {
+                await User.deleteOne({ _id: existingUser._id });
+            }
+
+            await User.create({
+                name: pending.name,
+                email: pending.email,
+                password: pending.password,
+                role: pending.role,
+                phone: pending.phone,
+                isVerified: true,
+                isApproved: pending.role === "seller" ? false : true,
+            });
+
+            await PendingRegistration.deleteOne({ _id: pending._id });
+
+            return res.status(200).json({
+                success: true,
+                message: "Email verified successfully. You can now log in.",
+            });
+        }
+
+        const legacyUser = await User.findOne({ email: normalizedEmail });
+
+        if (!legacyUser) {
             return res.status(404).json({
-                message: "User not found",
+                success: false,
+                message: "No pending registration found for this email",
             });
         }
 
-        if (user.isVerified) {
+        if (legacyUser.isVerified) {
             return res.status(400).json({
-                message: "Email already verified",
+                success: false,
+                message: "Email already verified. Please log in.",
             });
         }
 
-        if (user.verificationToken !== code) {
+        if (legacyUser.verificationToken !== normalizedCode) {
             return res.status(400).json({
+                success: false,
                 message: "Invalid verification code",
             });
         }
 
-        user.isVerified = true;
-        user.verificationToken = "";
-
-        await user.save();
+        legacyUser.isVerified = true;
+        legacyUser.verificationToken = "";
+        await legacyUser.save();
 
         res.status(200).json({
             success: true,
-            message: "Email verified successfully",
+            message: "Email verified successfully. You can now log in.",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// RESEND VERIFICATION CODE
+export const resendVerificationCode = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required",
+            });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+        const verificationToken = generateVerificationToken();
+
+        const pending = await PendingRegistration.findOne({
+            email: normalizedEmail,
+        });
+
+        if (pending) {
+            pending.verificationToken = verificationToken;
+            pending.expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+            await pending.save();
+
+            let emailSent = true;
+
+            try {
+                await sendVerificationEmail(
+                    pending.email,
+                    pending.name,
+                    verificationToken
+                );
+            } catch (emailError) {
+                emailSent = false;
+                console.error("Resend verification email failed:", emailError.message);
+                logDevVerificationCode(pending.email, verificationToken);
+            }
+
+            return res.status(200).json({
+                success: true,
+                emailSent,
+                message: emailSent
+                    ? "A new verification code has been sent."
+                    : "Could not send email. Check the backend console in development.",
+            });
+        }
+
+        const legacyUser = await User.findOne({
+            email: normalizedEmail,
+            isVerified: false,
+        });
+
+        if (!legacyUser) {
+            return res.status(404).json({
+                success: false,
+                message: "No pending registration found for this email",
+            });
+        }
+
+        legacyUser.verificationToken = verificationToken;
+
+        let emailSent = true;
+
+        try {
+            await sendVerificationEmail(
+                legacyUser.email,
+                legacyUser.name,
+                verificationToken
+            );
+            await legacyUser.save();
+        } catch (emailError) {
+            emailSent = false;
+            console.error("Resend verification email failed:", emailError.message);
+            logDevVerificationCode(legacyUser.email, verificationToken);
+            await legacyUser.save();
+        }
+
+        res.status(200).json({
+            success: true,
+            emailSent,
+            message: emailSent
+                ? "A new verification code has been sent."
+                : "Could not send email. Check the backend console in development.",
         });
     } catch (error) {
         res.status(500).json({
@@ -133,11 +308,24 @@ export const loginUser = async (req, res) => {
             });
         }
 
+        const normalizedEmail = email.toLowerCase().trim();
+
         const user = await User.findOne({
-            email: email.toLowerCase(),
+            email: normalizedEmail,
         });
 
         if (!user) {
+            const pending = await PendingRegistration.findOne({
+                email: normalizedEmail,
+            });
+
+            if (pending) {
+                return res.status(403).json({
+                    message:
+                        "Please verify your email to complete registration",
+                });
+            }
+
             return res.status(400).json({
                 message: "Invalid email or password",
             });

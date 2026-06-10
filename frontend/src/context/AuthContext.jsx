@@ -120,21 +120,23 @@ export const AuthProvider = ({ children }) => {
   // =====================================
   // Action: Register
   // =====================================
-  const register = useCallback(async (userData, rememberMe = true) => {
+  const register = useCallback(async (userData) => {
     try {
       const res = await api.post("/api/auth/register", userData);
-      const { token: resToken, user: resUser } = res.data;
 
-      syncAuthCredentials(resToken, resUser, rememberMe);
-
-      return { success: true, user: resUser };
+      return {
+        success: res.data.success,
+        message: res.data.message,
+        user: res.data.user,
+        emailSent: res.data.emailSent,
+      };
     } catch (error) {
       return {
         success: false,
         message: error.response?.data?.message || "Registration failed",
       };
     }
-  }, [syncAuthCredentials]);
+  }, []);
 
   // =====================================
   // Action: Refresh User Profile

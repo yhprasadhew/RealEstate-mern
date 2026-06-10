@@ -43,12 +43,15 @@ const Register = () => {
 
       if (result.success) {
         setSuccess(
-          "Registration successful! Redirecting to email verification..."
+          result.emailSent === false
+            ? "Redirecting to verification. If you did not get an email, use Resend on the next page or check the backend console in development."
+            : "Verification code sent! Redirecting..."
         );
 
         setTimeout(() => {
           navigate("/verify-email", {
             state: { email: formData.email },
+            replace: true,
           });
         }, 1500);
       } else {
