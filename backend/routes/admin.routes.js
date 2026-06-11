@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   blockUser,
+  unblockUser,
   deletePropertyAdmin,
   deleteUser,
   getAllInquiries,
@@ -22,6 +23,7 @@ adminRouter.use(protect, authorize("admin"));
 // Users
 adminRouter.get("/users", getAllUsers);
 adminRouter.patch("/users/:id/block", blockUser);
+adminRouter.patch("/users/:id/unblock", unblockUser);
 adminRouter.delete("/users/:id", deleteUser);
 
 // Properties
