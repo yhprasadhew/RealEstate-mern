@@ -2,6 +2,8 @@ import React from 'react'
 import { adminLayoutStyles as s } from '../../assets/dummyStyles'
 import AdminSidebar from '../AdminSidebar'
 import { useState } from 'react'
+import DashboardNavbar from '../DashboardNavbar'
+import { Outlet } from 'react-router-dom'
 
 
 const AdminLayout = () => {
@@ -17,7 +19,11 @@ const AdminLayout = () => {
 />
 
 <div className ={s.mainWrapper}>
-    
+    <DashboardNavbar onMenuClick ={() => setIsSidebarOpen(true)} />
+        <main className = {s.mainContent}>
+            <Outlet/>
+            
+        </main>
 </div>
     </div>
   )
