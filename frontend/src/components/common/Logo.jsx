@@ -18,7 +18,7 @@ const Logo = ({
       <div className={s.iconWrapper}>
         <HiOutlineHome size={iconSize} />
       </div>
-
+//logo
       {showText && (
         <span className={s.text}>
           Emerald Estates
