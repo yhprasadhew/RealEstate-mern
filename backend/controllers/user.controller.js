@@ -28,7 +28,7 @@ export const getProfile = async (req, res) => {
 export const getPublicProfile = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select(
-      "name profilePic role createdAt"
+      "name profilePicture role createdAt"
     );
 
     if (!user) {
@@ -70,16 +70,18 @@ export const updateProfile = async (req, res) => {
         "profiles"
       );
 
-      user.profilePic = result.secure_url;
+      user.profilePicture = result.secure_url;
     } else if (removeProfilePic === "true") {
-      user.profilePic = null;
+      user.profilePicture = "";
     }
 
-    if (name !== undefined) user.name = name;
-    if (phone !== undefined) user.phone = phone;
-    if (address !== undefined) user.address = address;
+    if (name !== undefined && name.trim()) user.name = name.trim();
+    if (phone !== undefined) user.phone = phone.trim();
+    if (address !== undefined) user.address = address.trim();
 
-    const updatedUser = await user.save();
+    await user.save();
+
+    const updatedUser = await User.findById(user._id).select("-password");
 
     res.status(200).json({
       success: true,

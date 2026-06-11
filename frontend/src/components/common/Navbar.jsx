@@ -105,7 +105,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-4">
             <Link to="/profile" className="flex items-center">
               <img
-                src={user?.profilePic || "https://via.placeholder.com/40"}
+                src={user?.profilePicture || "https://via.placeholder.com/40"}
                 alt="Profile"
                 className="w-10 h-10 rounded-full object-cover border border-gray-200"
               />
@@ -158,7 +158,7 @@ const Navbar = () => {
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-6">
                 <Link to="/profile" onClick={() => setIsOpen(false)}>
                   <img
-                    src={user?.profilePic || "https://via.placeholder.com/40"}
+                    src={user?.profilePicture || "https://via.placeholder.com/40"}
                     alt="Profile"
                     className="w-12 h-12 rounded-full object-cover border border-white shadow-sm"
                   />

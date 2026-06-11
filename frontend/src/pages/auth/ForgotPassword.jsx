@@ -23,9 +23,7 @@ const ForgotPassword = () => {
     try {
       const res = await axios.post(
         `${API_URL}/api/auth/forgot-password`,
-        {
-          email,
-        }
+        { email }
       );
 
       if (res.data.success) {
@@ -45,10 +43,12 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className={s.container}>
+    // Forces layout to stack vertically cleanly, grounding the Navbar at the very top
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
 
-      <div className={s.centerWrapper}>
+      {/* Takes up all remaining height and perfectly centers your card */}
+      <div className="flex-1 flex items-center justify-center p-4">
         <div className={s.formCard}>
           <h2 className={s.title}>
             Forgot Password
@@ -108,7 +108,7 @@ const ForgotPassword = () => {
               to="/login"
               className={s.backLink}
             >
-              ← Back to Login
+              &larr; Back to Login
             </Link>
           </div>
         </div>

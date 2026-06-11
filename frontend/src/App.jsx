@@ -7,6 +7,7 @@ import VerifyEmail from "./pages/auth/VerifyEmail";
 import Login from "./pages/auth/login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import Profile from "./pages/shared/Profile";
 
 const App = () => {
   return (
@@ -17,12 +18,15 @@ const App = () => {
         <Route path = "/verify-email" element={<VerifyEmail/>} />
         <Route path = "/register" element={<Register/>} />
         <Route path ="/forgot-password" element={<ForgotPassword /> } />
-        <Route path ="/reset-password" element={<ResetPassword /> } />
+        <Route path ="/reset-password/:token" element={<ResetPassword /> } />
 
 
         <Route path="/" element={<LandingPage />} />
         <Route path ="/properties" element={<Properties/> } />
          <Route path ="/properties/:id" element={<PropertyDetails/> } />
+
+       <Route path ="/profile" element={<Profile/> } />
+
  
 
       </Routes>

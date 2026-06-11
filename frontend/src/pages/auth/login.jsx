@@ -25,27 +25,20 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-
     setError("");
   };
 
   // Handle login submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setIsLoading(true);
     setError("");
 
     try {
-      const result = await login(
-        formData.email,
-        formData.password
-      );
-
+      const result = await login(formData.email, formData.password);
       if (result.success) {
         const storedUser = JSON.parse(
-          localStorage.getItem("user") ||
-            sessionStorage.getItem("user")
+          localStorage.getItem("user") || sessionStorage.getItem("user")
         );
 
         if (storedUser?.role === "admin") {
@@ -67,10 +60,12 @@ const Login = () => {
   };
 
   return (
-    <div className={s.pageContainer}>
+    // Explicitly force layout to stack normally
+    <div className="min-h-screen flex flex-col bg-gray-50"> 
       <Navbar />
 
-      <div className={s.containerCenter}>
+      {/* This container will now perfectly occupy the rest of the height and center the card */}
+      <div className="flex-1 flex items-center justify-center p-4">
         <div className={s.card}>
           <h2 className={s.title}>Welcome Back</h2>
 
@@ -90,7 +85,6 @@ const Login = () => {
               <label className={s.label}>
                 Email Address
               </label>
-
               <input
                 type="email"
                 name="email"
@@ -107,7 +101,6 @@ const Login = () => {
               <label className={s.label}>
                 Password
               </label>
-
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -121,25 +114,16 @@ const Login = () => {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
-                  {showPassword ? (
-                    <HiEyeOff size={20} />
-                  ) : (
-                    <HiEye size={20} />
-                  )}
+                  {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
                 </button>
               </div>
 
               {/* Forgot Password */}
               <div className="flex justify-end mt-2">
-                <Link
-                  to="/forgot-password"
-                  className={s.forgotLink}
-                >
+                <Link to="/forgot-password" className={s.forgotLink}>
                   Forgot Password?
                 </Link>
               </div>
@@ -157,10 +141,7 @@ const Login = () => {
             {/* Register Link */}
             <p className={s.footerText}>
               Don't have an account?{" "}
-              <Link
-                to="/register"
-                className={s.link}
-              >
+              <Link to="/register" className={s.link}>
                 Register
               </Link>
             </p>

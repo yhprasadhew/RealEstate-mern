@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import User from "../models/user.model.js";
 import PendingRegistration from "../models/pendingRegistration.model.js";
 import bcrypt from "bcryptjs";
@@ -381,6 +382,8 @@ export const loginUser = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 phone: user.phone,
+                address: user.address,
+                profilePicture: user.profilePicture,
             },
         });
     } catch (error) {
@@ -420,39 +423,81 @@ export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
 
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required",
+            });
+        }
+
         const user = await User.findOne({
-            email: email.toLowerCase(),
+            email: email.toLowerCase().trim(),
         });
 
         if (!user) {
             return res.status(404).json({
+                success: false,
                 message: "User not found",
             });
         }
 
-        const resetCode = Math.floor(
-            100000 + Math.random() * 900000
-        ).toString();
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(resetToken)
+            .digest("hex");
 
-        user.resetPasswordToken = resetCode;
-        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpires = Date.now() + 60 * 60 * 1000;
 
         await user.save();
 
-        await SendEmail({
-            email: user.email,
-            subject: "Password Reset",
-            message: `
-                <h2>Password Reset</h2>
-                <p>Your password reset code is:</p>
-                <h1>${resetCode}</h1>
-                <p>This code expires in 10 minutes.</p>
-            `,
-        });
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+        const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
+
+        try {
+            await SendEmail({
+                email: user.email,
+                subject: "Password Reset - Real Estate App",
+                message: `
+                    <h2>Password Reset</h2>
+                    <p>Hello ${user.name},</p>
+                    <p>Click the button below to reset your password:</p>
+                    <p>
+                        <a href="${resetLink}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">
+                            Reset Password
+                        </a>
+                    </p>
+                    <p>Or copy and paste this link into your browser:</p>
+                    <p><a href="${resetLink}">${resetLink}</a></p>
+                    <p>This link expires in 1 hour.</p>
+                    <p>If you did not request this, you can safely ignore this email.</p>
+                `,
+            });
+        } catch (emailError) {
+            console.error("Password reset email failed:", emailError.message);
+
+            if (process.env.NODE_ENV !== "production") {
+                console.log(
+                    `[DEV] Password reset link for ${user.email}: ${resetLink}`
+                );
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: "Could not send password reset email. Please try again later.",
+            });
+        }
+
+        if (process.env.NODE_ENV !== "production") {
+            console.log(
+                `[DEV] Password reset link for ${user.email}: ${resetLink}`
+            );
+        }
 
         res.status(200).json({
             success: true,
-            message: "Password reset code sent",
+            message: "Password reset link sent to your email",
         });
     } catch (error) {
         res.status(500).json({
@@ -465,24 +510,37 @@ export const forgotPassword = async (req, res) => {
 // RESET PASSWORD
 export const resetPassword = async (req, res) => {
     try {
-        const { email, code, password } = req.body;
+        const { token } = req.params;
+        const { password } = req.body;
 
-        const user = await User.findOne({
-            email: email.toLowerCase(),
-        });
-
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found",
+        if (!token || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Token and password are required",
             });
         }
 
-        if (
-            user.resetPasswordToken !== code ||
-            user.resetPasswordExpires < Date.now()
-        ) {
+        if (password.length < 6) {
             return res.status(400).json({
-                message: "Invalid or expired reset code",
+                success: false,
+                message: "Password must be at least 6 characters long",
+            });
+        }
+
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
+
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired reset link",
             });
         }
 
