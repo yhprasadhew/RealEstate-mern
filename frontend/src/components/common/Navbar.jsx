@@ -19,46 +19,31 @@ const Navbar = () => {
     logout();
   };
 
-  // Reusable list of conditional navigation links for both Desktop and Mobile views
-  const navLinks = (
+  // Center links visible to all desktop/mobile users, with role-specific items appended
+  const centerLinks = (
     <>
-      {/* Public Links */}
-      {!user && (
-        <>
-          <Link to="/properties" className={s.navLink} onClick={() => setIsOpen(false)}>
-            Browse Properties
-          </Link>
-          <Link to="/login" className={s.navLink} onClick={() => setIsOpen(false)}>
-            Login
-          </Link>
-          <Link to="/register" className={s.navLink} onClick={() => setIsOpen(false)}>
-            Register
-          </Link>
-        </>
-      )}
+      <Link to="/" className={s.navLink} onClick={() => setIsOpen(false)}>
+        Home
+      </Link>
+      <Link to="/properties" className={s.navLink} onClick={() => setIsOpen(false)}>
+        Browse Properties
+      </Link>
+      <Link to="/contact" className={s.navLink} onClick={() => setIsOpen(false)}>
+        Contact Us
+      </Link>
 
-      {/* Buyer Links */}
+      {/* Role specific links in the middle */}
       {user?.role === "buyer" && (
         <>
-          <Link to="/" className={s.navLink} onClick={() => setIsOpen(false)}>
-            Home
-          </Link>
-          <Link to="/properties" className={s.navLink} onClick={() => setIsOpen(false)}>
-            Properties
-          </Link>
           <Link to="/wishlist" className={s.navLink} onClick={() => setIsOpen(false)}>
             Wishlist
           </Link>
           <Link to="/chat-messages" className={s.navLink} onClick={() => setIsOpen(false)}>
             Messages
           </Link>
-          <Link to="/contact" className={s.navLink} onClick={() => setIsOpen(false)}>
-            Contact Us
-          </Link>
         </>
       )}
 
-      {/* Seller Links */}
       {user?.role === "seller" && (
         <>
           <Link to="/dashboard" className={s.navLink} onClick={() => setIsOpen(false)}>
@@ -73,13 +58,44 @@ const Navbar = () => {
         </>
       )}
 
-      {/* Admin Links */}
       {user?.role === "admin" && (
         <>
           <Link to="/admin-dashboard" className={s.navLink} onClick={() => setIsOpen(false)}>
             Admin Dashboard
           </Link>
         </>
+      )}
+    </>
+  );
+
+  // Right side links: Sign In and Register for guest, Avatar and Logout for authenticated members
+  const rightLinks = (
+    <>
+      {!user ? (
+        <div className="flex items-center gap-4">
+          <Link to="/login" className={s.navLink} onClick={() => setIsOpen(false)}>
+            Login
+          </Link>
+          <Link to="/register" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-sm" onClick={() => setIsOpen(false)}>
+            Register
+          </Link>
+        </div>
+      ) : (
+        <div className="flex items-center gap-4">
+          <Link to="/profile" className="flex items-center" onClick={() => setIsOpen(false)}>
+            <img
+              src={user?.profilePicture || "https://via.placeholder.com/40"}
+              alt="Profile"
+              className="w-10 h-10 rounded-full object-cover border border-gray-200"
+            />
+          </Link>
+          <button 
+            onClick={handleLogout} 
+            className={s.logoutBtn || "px-3 py-1.5 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"}
+          >
+            Logout
+          </button>
+        </div>
       )}
     </>
   );
@@ -95,29 +111,15 @@ const Navbar = () => {
       {/* 2. CENTER SIDE: Absolute dead-center alignment on Desktop */}
       <div className="hidden md:flex flex-initial justify-center items-center">
         <div className={s.desktopMenu || "flex items-center gap-6 font-medium text-gray-600"}>
-          {navLinks}
+          {centerLinks}
         </div>
       </div>
 
-      {/* 3. RIGHT SIDE: Profile Action / Mobile Toggle Button Area */}
+      {/* 3. RIGHT SIDE: Profile Action / Guest Auth / Mobile Toggle Button Area */}
       <div className="flex-1 flex items-center justify-end gap-4">
-        {user && (
-          <div className="hidden md:flex items-center gap-4">
-            <Link to="/profile" className="flex items-center">
-              <img
-                src={user?.profilePicture || "https://via.placeholder.com/40"}
-                alt="Profile"
-                className="w-10 h-10 rounded-full object-cover border border-gray-200"
-              />
-            </Link>
-            <button 
-              onClick={handleLogout} 
-              className={s.logoutBtn || "px-3 py-1.5 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"}
-            >
-              Logout
-            </button>
-          </div>
-        )}
+        <div className="hidden md:flex items-center gap-4">
+          {rightLinks}
+        </div>
 
         {/* Hamburger Trigger button - Fixed to the right edge (Visible only under 768px wide viewport) */}
         <button
@@ -172,7 +174,17 @@ const Navbar = () => {
 
             {/* Vertically Stacked Interactive Links */}
             <div className="flex flex-col gap-4 text-left overflow-y-auto flex-1">
-              {navLinks}
+              {centerLinks}
+              {!user && (
+                <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
+                  <Link to="/login" className={s.navLink} onClick={() => setIsOpen(false)}>
+                    Login
+                  </Link>
+                  <Link to="/register" className="w-full p-3 text-center font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-750 rounded-xl transition-colors" onClick={() => setIsOpen(false)}>
+                    Register
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Mobile Footer Logout Button */}

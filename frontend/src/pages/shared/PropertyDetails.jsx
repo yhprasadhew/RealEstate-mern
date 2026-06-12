@@ -198,7 +198,8 @@ const PropertyDetails = () => {
         setSimilar(res.data.similarProperties || []);
         if (user && token) {
           const wr = await axios.get(`${API_URL}/api/wishlist`, { headers:{ Authorization:`Bearer ${token}` } });
-          setIsInWishlist(wr.data.some(i => i.property?._id === id));
+          const wishlistArray = wr.data.wishlist || [];
+          setIsInWishlist(wishlistArray.some(i => i.property?._id === id));
         }
       } catch (e) {
         if (alive) setError(e.response?.data?.message || "Failed to load property.");

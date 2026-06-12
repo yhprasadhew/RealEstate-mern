@@ -283,7 +283,8 @@ const Properties = () => {
     if (!token) return;
     try {
       const res = await axios.get(`${API_URL}/api/wishlist`, { headers: { Authorization: `Bearer ${token}` } });
-      setWishlistedIds(res.data.filter((i) => i?.property).map((i) => String(i.property._id || i.property)));
+      const wishlistArray = res.data.wishlist || [];
+      setWishlistedIds(wishlistArray.filter((i) => i?.property).map((i) => String(i.property._id || i.property)));
     } catch {}
   }, [token]);
 

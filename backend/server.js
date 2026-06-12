@@ -14,6 +14,7 @@ import wishlistRouter from "./routes/wishlist.route.js";
 import contactRouter from "./routes/contact.route.js";
 import adminRouter from "./routes/admin.routes.js";
 import chatRouter from "./routes/chat.routes.js";
+import reviewRouter from "./routes/review.routes.js";
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +38,7 @@ app.use("/api/wishlist", wishlistRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/reviews", reviewRouter);
 
 app.get("/", (req, res) => {
   res.send("API is running...");

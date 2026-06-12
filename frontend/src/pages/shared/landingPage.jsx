@@ -10,6 +10,7 @@ import {
   HiPhone,
   HiMail,
   HiChevronDown,
+  HiOutlineStar,
 } from "react-icons/hi";
 import axios from "axios";
 import Navbar from "../../components/common/Navbar";
@@ -91,6 +92,15 @@ const LandingPage = () => {
   });
   const [wishlistedIDs, setWishlistedIDs] = useState([]);
 
+  // Reviews State
+  const [reviews, setReviews] = useState([]);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewHoverRating, setReviewHoverRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitLoading, setReviewSubmitLoading] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewError, setReviewError] = useState(null);
+
   const [featRef, featVisible] = useReveal();
   const [whyRef,  whyVisible]  = useReveal();
 
@@ -129,24 +139,60 @@ const LandingPage = () => {
       const res = await axios.get(`${API_URL}/api/wishlist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (Array.isArray(res.data)) {
-        setWishlistedIDs(
-          res.data.filter(i => i?.property).map(i => String(i.property._id))
-        );
-      }
+      const wishlistArray = res.data.wishlist || [];
+      setWishlistedIDs(
+        wishlistArray.filter(i => i?.property).map(i => String(i.property._id))
+      );
     } catch { /* silent */ }
   }, [token]);
+
+  const fetchReviews = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/reviews`);
+      if (res.data?.success) {
+        setReviews(res.data.reviews || []);
+      }
+    } catch (err) {
+      console.error("Failed to load reviews:", err);
+    }
+  }, []);
 
   // ── Bootstrap data on mount / auth change ────────────────────────────
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      await Promise.all([fetchProperties(), fetchCounts()]);
+      await Promise.all([fetchProperties(), fetchCounts(), fetchReviews()]);
       if (user && token) await fetchWishlist();
       setLoading(false);
     };
     init();
-  }, [user, token, fetchProperties, fetchCounts, fetchWishlist]);
+  }, [user, token, fetchProperties, fetchCounts, fetchWishlist, fetchReviews]);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!token) return;
+    setReviewSubmitLoading(true);
+    setReviewError(null);
+    try {
+      const res = await axios.post(
+        `${API_URL}/api/reviews`,
+        { rating: reviewRating, comment: reviewComment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) {
+        setReviewSuccess(true);
+        setReviewComment("");
+        setReviewRating(5);
+      } else {
+        setReviewError(res.data.message || "Failed to submit review.");
+      }
+    } catch (err) {
+      console.error("Error submitting review:", err);
+      setReviewError(err.response?.data?.message || "Failed to submit review.");
+    } finally {
+      setReviewSubmitLoading(false);
+    }
+  };
 
   // ── Wishlist toggle ───────────────────────────────────────────────────
   const handleToggleWishlist = async (propertyId) => {
@@ -165,8 +211,8 @@ const LandingPage = () => {
         setWishlistedIDs(prev => prev.filter(x => x !== id));
       } else {
         await axios.post(
-          `${API_URL}/api/wishlist`,
-          { propertyId: id },
+          `${API_URL}/api/wishlist/${id}`,
+          {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setWishlistedIDs(prev => [...prev, id]);
@@ -490,26 +536,150 @@ const LandingPage = () => {
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tighter">What Our Clients Say</h2>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
-          {testimonials.map((t, i) => (
-            <div key={i} className="bg-white p-7 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-shadow duration-300">
-              <div className="flex gap-0.5 mb-4">
-                {[...Array(t.stars)].map((_, s) => (
-                  <HiStar key={s} size={16} className="text-amber-400" />
-                ))}
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
-                  {t.name[0]}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7 mb-16">
+          {reviews.length > 0 ? (
+            reviews.map((r) => (
+              <div key={r._id} className="bg-white p-7 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="flex gap-0.5 mb-4">
+                  {[...Array(r.rating)].map((_, s) => (
+                    <HiStar key={s} size={16} className="text-amber-400" />
+                  ))}
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">{t.name}</p>
-                  <p className="text-xs text-slate-400">{t.role}</p>
+                <p className="text-slate-600 text-sm leading-relaxed mb-6">&ldquo;{r.comment}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden border border-slate-100">
+                    {r.user?.profilePicture ? (
+                      <img src={r.user.profilePicture} alt={r.user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      r.user?.name?.[0]?.toUpperCase() || "U"
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">{r.user?.name || "Anonymous"}</p>
+                    <p className="text-xs text-slate-400 capitalize">{r.user?.role || "Visitor"}</p>
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            testimonials.map((t, i) => (
+              <div key={i} className="bg-white p-7 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="flex gap-0.5 mb-4">
+                  {[...Array(t.stars)].map((_, s) => (
+                    <HiStar key={s} size={16} className="text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-slate-600 text-sm leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">{t.name}</p>
+                    <p className="text-xs text-slate-400">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* ─── Submit a review section ─── */}
+        <div className="py-12 px-6 max-w-2xl mx-auto bg-slate-50 border border-slate-100 rounded-3xl">
+          <h3 className="text-2xl font-black text-slate-900 text-center tracking-tight mb-2">
+            Share Your Experience
+          </h3>
+          <p className="text-slate-500 text-center text-sm mb-8">
+            Help us improve! Submit your rating and review of our platform.
+          </p>
+
+          {user ? (
+            /* Review Form */
+            reviewSuccess ? (
+              <div className="text-center py-6">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+                  <HiStar size={24} />
+                </div>
+                <h4 className="font-extrabold text-slate-900 text-lg mb-2">Review Submitted!</h4>
+                <p className="text-slate-500 text-sm max-w-md mx-auto">
+                  Thank you for your feedback. Once approved by our moderation team, it will be displayed on the homepage.
+                </p>
+                <button
+                  onClick={() => setReviewSuccess(false)}
+                  className="mt-6 text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none"
+                >
+                  Submit another review
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleReviewSubmit} className="space-y-6">
+                {reviewError && (
+                  <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm">
+                    {reviewError}
+                  </div>
+                )}
+
+                {/* Star selector */}
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Your Rating</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        onMouseEnter={() => setReviewHoverRating(star)}
+                        onMouseLeave={() => setReviewHoverRating(0)}
+                        className="cursor-pointer transition-transform duration-100 hover:scale-110 border-none bg-transparent"
+                      >
+                        {star <= (reviewHoverRating || reviewRating) ? (
+                          <HiStar size={32} className="text-amber-400" />
+                        ) : (
+                          <HiOutlineStar size={32} className="text-slate-300" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Review Text */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Your Comment</span>
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="Tell us what you like about the website..."
+                    className="w-full p-4 rounded-2xl border border-slate-200 bg-white outline-none focus:border-emerald-500 transition-colors text-sm text-slate-800 leading-relaxed resize-none"
+                    rows="4"
+                    required
+                  ></textarea>
+                </div>
+
+                <div className="text-center">
+                  <button
+                    type="submit"
+                    disabled={reviewSubmitLoading}
+                    className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-sm px-8 py-3.5 rounded-xl transition-all duration-200 shadow-md shadow-emerald-600/10 cursor-pointer border-none"
+                  >
+                    {reviewSubmitLoading ? "Submitting..." : "Submit Review"}
+                  </button>
+                </div>
+              </form>
+            )
+          ) : (
+            /* Login Prompt */
+            <div className="text-center p-6 bg-white border border-slate-100 rounded-2xl">
+              <p className="text-slate-500 text-sm mb-4">
+                Please log in to submit a review and rate our services.
+              </p>
+              <Link
+                to="/login"
+                className="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-sm"
+              >
+                Log In to Rate Us
+              </Link>
             </div>
-          ))}
+          )}
         </div>
       </section>
 

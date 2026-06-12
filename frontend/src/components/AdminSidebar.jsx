@@ -6,7 +6,8 @@ import {
   HiOutlineUserCircle,   // Added missing import
   HiOutlineLibrary,      // Added missing import
   HiOutlineChatAlt2,     // Added missing import
-  HiOutlineMail          // Added missing import
+  HiOutlineMail,          // Added missing import
+  HiOutlineStar
 } from 'react-icons/hi';
 import { adminSidebarStyles as s } from '../assets/dummyStyles';
 import { useAuth } from '../context/AuthContext';
@@ -22,6 +23,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
     { name: "Properties", icon: HiOutlineLibrary, path: "/admin/properties" },
     { name: "Inquiries", icon: HiOutlineChatAlt2, path: "/admin/inquiries" },
     { name: "Contact Inbox", icon: HiOutlineMail, path: "/admin/contacts" },
+    { name: "Reviews", icon: HiOutlineStar, path: "/admin/reviews" },
   ];
 
   return (

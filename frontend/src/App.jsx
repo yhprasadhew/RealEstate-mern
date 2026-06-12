@@ -22,6 +22,9 @@ import CreateListing from "./pages/seller/CreateListing";
 import EditListing from "./pages/seller/EditListing";
 import ChatMessages from "./pages/shared/ChatMessages";
 import SellerInquiries from "./pages/seller/SellerInquiries";
+import Wishlist from "./pages/shared/Wishlist";
+import ContactUs from "./pages/shared/ContactUs";
+import AdminReviews from "./pages/admin/AdminReviews";
 
 const App = () => {
   return (
@@ -51,6 +54,7 @@ const App = () => {
             <Route path="/admin/properties" element={<AdminProperties />} />
             <Route path="/admin/inquiries" element={<AdminInquiries />} />
             <Route path="/admin/contacts" element={<AdminContacts />} />
+            <Route path="/admin/reviews" element={<AdminReviews />} />
           </Route>
         </Route>
 
@@ -69,6 +73,14 @@ const App = () => {
         <Route element={<ProtectedRoute allowedRoles={["buyer", "seller"]} />}>
           <Route path="/chat-messages" element={<ChatMessages />} />
         </Route>
+
+        {/* Protected Buyer Routes */}
+        <Route element={<ProtectedRoute allowedRoles={["buyer"]} />}>
+          <Route path="/wishlist" element={<Wishlist />} />
+        </Route>
+
+        {/* Public Contact Route */}
+        <Route path="/contact" element={<ContactUs />} />
 
        <Route path ="/profile" element={<Profile/> } />
 
