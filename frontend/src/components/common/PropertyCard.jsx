@@ -82,7 +82,11 @@ const PropertyCard = ({ property, renderActions, isWishlisted, onToggleWishlist 
             {/* Location Pill */}
             <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full text-slate-500 text-xs font-medium mb-3">
               <HiLocationMarker size={14} className="text-emerald-500 shrink-0" />
-              <span className="truncate">{property.location || "Prime Location, LK"}</span>
+              <span className="truncate">
+                {property.area && property.city 
+                  ? `${property.area}, ${property.city}` 
+                  : "Prime Location, LK"}
+              </span>
             </div>
 
             {/* Title */}
@@ -95,16 +99,16 @@ const PropertyCard = ({ property, renderActions, isWishlisted, onToggleWishlist 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
             <div className="flex items-center text-xs font-semibold text-slate-400 gap-2.5">
               
-              {/* Beds Count */}
-              {property.bedrooms && (
+              {/* BHK / Beds Count */}
+              {property.bhk && (
                 <div className="flex items-center gap-1">
-                  <span className="text-slate-800 font-bold">{property.bedrooms}</span>
-                  <span>{property.bedrooms === 1 ? "Bed" : "Beds"}</span>
+                  <span className="text-slate-800 font-bold">{property.bhk}</span>
+                  <span>BHK</span>
                 </div>
               )}
 
               {/* Divider */}
-              {property.bedrooms && property.bathrooms && <span className="text-slate-200">|</span>}
+              {property.bhk && property.bathrooms && <span className="text-slate-200">|</span>}
 
               {/* Baths Count */}
               {property.bathrooms && (
@@ -115,12 +119,12 @@ const PropertyCard = ({ property, renderActions, isWishlisted, onToggleWishlist 
               )}
 
               {/* Divider */}
-              {property.bathrooms && property.area && <span className="text-slate-200">|</span>}
+              {property.bathrooms && property.areaSize && <span className="text-slate-200">|</span>}
 
-              {/* Area */}
-              {property.area && (
+              {/* Area Size */}
+              {property.areaSize && (
                 <div className="flex items-center gap-1">
-                  <span className="truncate">{property.areaName || "Area"} sq ft</span>
+                  <span className="truncate">{property.areaSize} sq ft</span>
                 </div>
               )}
             </div>

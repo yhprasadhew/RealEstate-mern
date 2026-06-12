@@ -47,7 +47,7 @@ const SellerDashboard = () => {
       // Fetch seller properties
       const propsRes = await api.get("/api/property/my");
       if (propsRes.data.success) {
-        setProperties(propsRes.data.properties);
+        setProperties(propsRes.data.properties || []);
       }
     } catch (err) {
       console.error(err);
@@ -103,9 +103,18 @@ const SellerDashboard = () => {
     }
   };
 
+  // Format Price in LKR
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("en-LK", {
+      style: "currency",
+      currency: "LKR",
+      maximumFractionDigits: 0,
+    }).format(price ?? 0);
+  };
+
   // Filter properties by search term
-  const filteredProperties = properties.filter((prop) =>
-    prop.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProperties = (properties || []).filter((prop) =>
+    (prop.title || "").toLowerCase().includes((searchTerm || "").toLowerCase())
   );
 
   if (loading && properties.length === 0) {
@@ -264,7 +273,7 @@ const SellerDashboard = () => {
 
                   <div className="flex justify-between items-center mb-6 pt-3 border-t border-dashed border-[#f1f5f9] mt-auto">
                     <span className="font-black text-primary text-lg">
-                      ₹{prop.price.toLocaleString("en-IN")}
+                      {formatPrice(prop.price)}
                     </span>
                     <span className="text-[#64748b] text-xs flex items-center gap-1">
                       <HiOutlineEye size={16} />

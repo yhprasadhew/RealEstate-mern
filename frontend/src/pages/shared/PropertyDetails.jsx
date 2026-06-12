@@ -359,26 +359,69 @@ const PropertyDetails = () => {
               </div>
 
               {/* Gallery */}
-              <div className="au2" style={{ marginBottom:24 }}>
+              <div className="au2" style={{ marginBottom: 24 }}>
                 {images.length === 1 ? (
-                  <div className="gallery-main" style={{ height:420 }} onClick={() => openLightbox(0)}>
+                  <div className="gallery-main" style={{ height: 400 }} onClick={() => openLightbox(0)}>
                     <img src={images[0]} alt={property.title} />
                   </div>
-                ) : (
-                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"260px 150px", gap:10 }}>
-                    {/* Main */}
-                    <div className="gallery-main" style={{ gridRow:"1 / 3" }} onClick={() => openLightbox(0)} ref={mainImageRef}>
-                      <img src={images[0]} alt={property.title} style={{ height:"100%" }} />
+                ) : images.length === 2 ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, height: 400 }}>
+                    <div className="gallery-main" onClick={() => openLightbox(0)}>
+                      <img src={images[0]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
                     </div>
-                    {/* Thumbs */}
-                    {images.slice(1,4).map((img, i) => (
-                      <div key={i} className="gallery-thumb" onClick={() => openLightbox(i+1)}>
-                        <img src={img} alt={`${property.title} ${i+2}`} />
-                        {i === 2 && images.length > 4 && (
-                          <div className="overlay">+{images.length-4} more</div>
-                        )}
-                      </div>
-                    ))}
+                    <div className="gallery-main" onClick={() => openLightbox(1)}>
+                      <img src={images[1]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                  </div>
+                ) : images.length === 3 ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gridTemplateRows: "195px 195px", gap: 10, height: 400 }}>
+                    <div className="gallery-main" style={{ gridRow: "1 / 3" }} onClick={() => openLightbox(0)}>
+                      <img src={images[0]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(1)}>
+                      <img src={images[1]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(2)}>
+                      <img src={images[2]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                  </div>
+                ) : images.length === 4 ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gridTemplateRows: "195px 195px", gap: 10, height: 400 }}>
+                    <div className="gallery-main" style={{ gridRow: "1 / 3" }} onClick={() => openLightbox(0)}>
+                      <img src={images[0]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(1)}>
+                      <img src={images[1]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(2)}>
+                      <img src={images[2]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" style={{ gridColumn: "2 / span 2" }} onClick={() => openLightbox(3)}>
+                      <img src={images[3]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gridTemplateRows: "195px 195px", gap: 10, height: 400 }}>
+                    <div className="gallery-main" style={{ gridRow: "1 / 3" }} onClick={() => openLightbox(0)}>
+                      <img src={images[0]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(1)}>
+                      <img src={images[1]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(2)}>
+                      <img src={images[2]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(3)}>
+                      <img src={images[3]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                    </div>
+                    <div className="gallery-thumb" onClick={() => openLightbox(4)}>
+                      <img src={images[4]} alt={property.title} style={{ height: "100%", width: "100%", objectFit: "cover" }} />
+                      {images.length > 5 && (
+                        <div className="overlay" style={{ opacity: 1, background: "rgba(0,0,0,0.55)" }}>
+                          +{images.length - 4} more
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

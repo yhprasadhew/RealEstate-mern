@@ -28,6 +28,7 @@ const App = () => {
     <div>
       <Routes>
       
+      //public routes
         <Route path = "/login"  element={<Login/>} />
         <Route path = "/verify-email" element={<VerifyEmail/>} />
         <Route path = "/register" element={<Register/>} />
