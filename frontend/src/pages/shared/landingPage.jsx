@@ -17,8 +17,7 @@ import Navbar from "../../components/common/Navbar";
 import { useAuth } from "../../context/AuthContext";
 // FIXED: import the shared PropertyCard — the duplicate inline definition has been removed
 import PropertyCard from "../../components/common/PropertyCard";
-
-const API_URL = "http://localhost:5000";
+import API_URL from "../../config";
 
 /* ─── Scroll-reveal hook ─────────────────────────────────────────────── */
 const useReveal = () => {
