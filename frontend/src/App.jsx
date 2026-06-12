@@ -16,6 +16,11 @@ import AdminProperties from "./pages/admin/AdminProperties";
 import AdminInquiries from "./pages/admin/AdminInquiries";
 import AdminContacts from "./pages/admin/AdminContacts";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
+import SellerLayout from "./components/SellerLayout";
+import SellerDashboard from "./pages/seller/SellerDashboard";
+import CreateListing from "./pages/seller/CreateListing";
+import EditListing from "./pages/seller/EditListing";
+import ChatMessages from "./pages/shared/ChatMessages";
 
 const App = () => {
   return (
@@ -45,6 +50,20 @@ const App = () => {
             <Route path="/admin/inquiries" element={<AdminInquiries />} />
             <Route path="/admin/contacts" element={<AdminContacts />} />
           </Route>
+        </Route>
+
+        {/* Protected Seller Routes */}
+        <Route element={<ProtectedRoute allowedRoles={["seller"]} />}>
+          <Route element={<SellerLayout />}>
+            <Route path="/dashboard" element={<SellerDashboard />} />
+            <Route path="/dashboard/create-listing" element={<CreateListing />} />
+            <Route path="/dashboard/edit-listing/:id" element={<EditListing />} />
+          </Route>
+        </Route>
+
+        {/* Protected Chat Route */}
+        <Route element={<ProtectedRoute allowedRoles={["buyer", "seller"]} />}>
+          <Route path="/chat-messages" element={<ChatMessages />} />
         </Route>
 
        <Route path ="/profile" element={<Profile/> } />
