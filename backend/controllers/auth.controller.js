@@ -384,6 +384,8 @@ export const loginUser = async (req, res) => {
                 phone: user.phone,
                 address: user.address,
                 profilePicture: user.profilePicture,
+                isApproved: user.isApproved,
+                isVerified: user.isVerified,
             },
         });
     } catch (error) {

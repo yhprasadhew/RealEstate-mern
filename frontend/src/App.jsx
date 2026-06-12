@@ -21,6 +21,7 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import CreateListing from "./pages/seller/CreateListing";
 import EditListing from "./pages/seller/EditListing";
 import ChatMessages from "./pages/shared/ChatMessages";
+import SellerInquiries from "./pages/seller/SellerInquiries";
 
 const App = () => {
   return (
@@ -56,6 +57,8 @@ const App = () => {
         <Route element={<ProtectedRoute allowedRoles={["seller"]} />}>
           <Route element={<SellerLayout />}>
             <Route path="/dashboard" element={<SellerDashboard />} />
+            <Route path="/my-properties" element={<SellerDashboard />} />
+            <Route path="/inquiries" element={<SellerInquiries />} />
             <Route path="/dashboard/create-listing" element={<CreateListing />} />
             <Route path="/dashboard/edit-listing/:id" element={<EditListing />} />
           </Route>

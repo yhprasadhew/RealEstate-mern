@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   HiOutlineLibrary,
   HiOutlineCheckCircle,
@@ -18,6 +18,9 @@ import { sellerDashboardStyles as s, myPropertiesStyles as m } from "../../asset
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMyPropertiesOnly = location.pathname === "/my-properties";
+
   const [stats, setStats] = useState({
     totalProperties: 0,
     activeListings: 0,
@@ -118,8 +121,12 @@ const SellerDashboard = () => {
       {/* Header */}
       <div className={s.header}>
         <div className={s.headerLeft}>
-          <h1 className={s.headerTitle}>Seller Overview</h1>
-          <p className={s.headerSubtitle}>Monitor your real estate performance and listings</p>
+          <h1 className={s.headerTitle}>{isMyPropertiesOnly ? "My Listings" : "Seller Overview"}</h1>
+          <p className={s.headerSubtitle}>
+            {isMyPropertiesOnly 
+              ? "Manage and edit your listed properties" 
+              : "Monitor your real estate performance and listings"}
+          </p>
         </div>
         <div className={s.headerActions}>
           <Link to="/dashboard/create-listing" className={s.addButton}>
@@ -137,7 +144,8 @@ const SellerDashboard = () => {
       )}
 
       {/* Stats Cards */}
-      <div className={s.statsGrid}>
+      {!isMyPropertiesOnly && (
+        <div className={s.statsGrid}>
         {/* Total Properties */}
         <div className={s.statCard}>
           <div className={s.statIconWrapper}>
@@ -183,6 +191,7 @@ const SellerDashboard = () => {
           <h2 className={s.statValue}>{stats.totalInquiries}</h2>
         </div>
       </div>
+      )}
 
       {/* Listings Section */}
       <div className={s.listingsSection}>

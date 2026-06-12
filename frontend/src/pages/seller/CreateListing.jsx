@@ -188,7 +188,7 @@ const CreateListing = () => {
 
               <div className={s.twoColumnGrid}>
                 <div>
-                  <label className={s.label}>Price (in INR) *</label>
+                  <label className={s.label}>Price (in LKR) *</label>
                   <input
                     type="number"
                     name="price"
@@ -236,7 +236,7 @@ const CreateListing = () => {
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    placeholder="e.g. Mumbai"
+                    placeholder="e.g. Colombo"
                     required
                     className={s.input}
                   />
@@ -249,7 +249,7 @@ const CreateListing = () => {
                     name="area"
                     value={formData.area}
                     onChange={handleChange}
-                    placeholder="e.g. Bandra West"
+                    placeholder="e.g. colombo:-01"
                     required
                     className={s.input}
                   />

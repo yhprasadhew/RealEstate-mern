@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import {
   HiOutlineUser,
   HiOutlineMail,
   HiOutlinePhone,
   HiOutlineLocationMarker,
   HiX,
+  HiArrowLeft,
 } from "react-icons/hi";
 
 import { profileStyles as s } from "../../assets/dummyStyles";
@@ -170,6 +171,14 @@ const Profile = () => {
       {displayUser?.role !== "seller" && <Navbar />}
 
       <div className={s.mainContainer?.(displayUser?.role)}>
+        <Link
+          to={displayUser?.role === "seller" ? "/dashboard" : "/"}
+          className="mb-6 flex items-center gap-2 text-[#64748b] hover:text-primary font-bold no-underline inline-flex transition-colors duration-200"
+        >
+          <HiArrowLeft size={16} />
+          <span>{displayUser?.role === "seller" ? "Back to Dashboard" : "Back to Home Page"}</span>
+        </Link>
+
         <header className={s.header}>
           <h1 className={s.pageTitle}>Personal Profile</h1>
           <p className={s.pageSubtitle}>
