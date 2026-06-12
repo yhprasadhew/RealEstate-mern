@@ -309,15 +309,19 @@ const Properties = () => {
     if (user) fetchWishlist();
   }, [location.search, user, fetchProperties, fetchWishlist]);
 
-  /* debounce city search */
-  useEffect(() => {
-    if (searchCity === filters.city) return;
-    const t = setTimeout(() => {
-      const u = { ...filters, city: searchCity };
-      setFilters(u); updateURLParams(u);
-    }, 420);
-    return () => clearTimeout(t);
-  }, [searchCity, filters]);
+  const handleLocationSearch = (e) => {
+    if (e) e.preventDefault();
+    const u = { ...filters, city: searchCity.trim() };
+    setFilters(u);
+    updateURLParams(u);
+  };
+
+  const handleClearLocation = () => {
+    setSearchCity("");
+    const u = { ...filters, city: "" };
+    setFilters(u);
+    updateURLParams(u);
+  };
 
   /* remove a specific pill */
   const removeFilter = (key) => {
@@ -345,39 +349,49 @@ const Properties = () => {
     <>
       {/* Search */}
       <FilterSection title="Location" defaultOpen={true}>
-        <div
-          style={{
-            display: "flex", alignItems: "center", gap: 10,
-            background: searchFocused ? "#fff" : "var(--surface)",
-            border: `1.5px solid ${searchFocused ? "var(--accent)" : "var(--border)"}`,
-            borderRadius: 12, padding: "9px 13px",
-            boxShadow: searchFocused ? "0 0 0 4px var(--accent-glow)" : "none",
-            transition: "all .2s",
-          }}
-        >
-          <HiSearch size={15} style={{ color: "var(--ink-muted)", flexShrink: 0 }} />
-          <input
-            ref={searchRef}
-            type="text"
-            value={searchCity}
-            onChange={(e) => setSearchCity(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            placeholder="City, district, area…"
+        <form onSubmit={handleLocationSearch} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div
             style={{
-              background: "none", border: "none", outline: "none", fontSize: 13,
-              fontWeight: 500, color: "var(--ink)", flex: 1, fontFamily: "inherit",
+              display: "flex", alignItems: "center", gap: 10,
+              background: searchFocused ? "#fff" : "var(--surface)",
+              border: `1.5px solid ${searchFocused ? "var(--accent)" : "var(--border)"}`,
+              borderRadius: 12, padding: "9px 13px",
+              boxShadow: searchFocused ? "0 0 0 4px var(--accent-glow)" : "none",
+              transition: "all .2s",
             }}
-          />
-          {searchCity && (
-            <button
-              onClick={() => setSearchCity("")}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-muted)", display: "flex", alignItems: "center", padding: 0 }}
-            >
-              <HiX size={13} />
-            </button>
-          )}
-        </div>
+          >
+            <HiSearch size={15} style={{ color: "var(--ink-muted)", flexShrink: 0 }} />
+            <input
+              ref={searchRef}
+              type="text"
+              value={searchCity}
+              onChange={(e) => setSearchCity(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              placeholder="City, district, area…"
+              style={{
+                background: "none", border: "none", outline: "none", fontSize: 13,
+                fontWeight: 500, color: "var(--ink)", flex: 1, fontFamily: "inherit",
+              }}
+            />
+            {searchCity && (
+              <button
+                type="button"
+                onClick={handleClearLocation}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-muted)", display: "flex", alignItems: "center", padding: 0 }}
+              >
+                <HiX size={13} />
+              </button>
+            )}
+          </div>
+          <button
+            type="submit"
+            className="btn-accent"
+            style={{ width: "100%", padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 700 }}
+          >
+            Search Location
+          </button>
+        </form>
       </FilterSection>
 
       {/* Price Range */}
@@ -587,7 +601,7 @@ const Properties = () => {
                   </span>
                 )}
               </div>
-              <FilterPanel />
+              {FilterPanel()}
             </aside>
 
             {/* Listings area */}
@@ -657,7 +671,7 @@ const Properties = () => {
                   <HiX size={18} style={{ color: "var(--ink-muted)" }} />
                 </button>
               </div>
-              <FilterPanel />
+              {FilterPanel()}
               <button
                 className="btn-accent"
                 style={{ width: "100%", padding: "14px", borderRadius: 14, fontSize: 14, marginTop: 12 }}
