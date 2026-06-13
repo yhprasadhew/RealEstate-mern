@@ -349,8 +349,8 @@ const LandingPage = () => {
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-8 pt-6 border-t border-slate-200/60 w-full max-w-lg">
-              <StatCounter end={5000} suffix="+" label="Listed Properties" />
-              <StatCounter end={1200} suffix="+" label="Happy Clients" />
+              <StatCounter end={100} suffix="+" label="Listed Properties" />
+              <StatCounter end={100} suffix="+" label="Happy Clients" />
               <StatCounter end={50}   suffix="+" label="Cities Covered" />
             </div>
           </div>
@@ -411,7 +411,6 @@ const LandingPage = () => {
             >
               <span className="text-3xl">{c.emoji}</span>
               <span className="font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">{c.label}</span>
-              <span className="text-xs text-slate-400 font-medium">{c.count} listings</span>
             </Link>
           ))}
         </div>
