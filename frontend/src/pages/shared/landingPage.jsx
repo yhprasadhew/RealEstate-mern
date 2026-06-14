@@ -582,7 +582,7 @@ const LandingPage = () => {
           )}
         </div>
 
-        {/* ─── Submit a review section ─── */}
+        {/* ─── Submit a review section ───*/}
         <div className="py-12 px-6 max-w-2xl mx-auto bg-slate-50 border border-slate-100 rounded-3xl">
           <h3 className="text-2xl font-black text-slate-900 text-center tracking-tight mb-2">
             Share Your Experience
