@@ -718,7 +718,7 @@ const LandingPage = () => {
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-slate-400">
               <a href="tel:+1234567890" className="flex items-center gap-2 hover:text-white transition-colors">
-                <HiPhone size={15} /> +1 (234) 567-890
+                <HiPhone size={15} /> +94 (76) 307-9003
               </a>
               <span className="hidden sm:block text-slate-700">|</span>
               <a href="mailto:hello@emeraldestates.com" className="flex items-center gap-2 hover:text-white transition-colors">
