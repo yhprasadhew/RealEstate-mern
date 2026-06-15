@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 
 import { loginStyles as s } from "../../assets/dummyStyles";
 import { useAuth } from "../../context/AuthContext";
-import Navbar from "../../components/common/Navbar";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -62,7 +61,6 @@ const Login = () => {
   return (
     // Explicitly force layout to stack normally
     <div className="min-h-screen flex flex-col bg-gray-50"> 
-      <Navbar />
 
       {/* This container will now perfectly occupy the rest of the height and center the card */}
       <div className="flex-1 flex items-center justify-center p-4">
