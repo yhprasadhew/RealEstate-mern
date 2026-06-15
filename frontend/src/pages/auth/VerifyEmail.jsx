@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { HiArrowLeft } from "react-icons/hi";
 
 import { verifyEmailStyles as s } from "../../assets/dummyStyles";
-import Navbar from "../../components/common/Navbar";
 import API_URL from "../../config";
 
 const VerifyEmail = () => {
@@ -72,10 +72,19 @@ const VerifyEmail = () => {
   };
 
   return (
-    <div className={s.pageContainer}>
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-bg-main">
+      {/* Back to Home Button */}
+      <div className="w-full max-w-7xl mx-auto px-6 pt-6 flex justify-start">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+        >
+          <HiArrowLeft size={20} />
+          Back to Home
+        </Link>
+      </div>
 
-      <div className={s.containerCenter}>
+      <div className="flex-1 flex items-center justify-center p-4">
         <div className={s.card}>
           <h2 className={s.title}>Verify Your Email</h2>
 
