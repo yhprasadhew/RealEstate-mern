@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { HiEye, HiEyeOff } from "react-icons/hi";
+import { HiEye, HiEyeOff, HiArrowLeft } from "react-icons/hi";
 
 import { loginStyles as s } from "../../assets/dummyStyles";
 import { useAuth } from "../../context/AuthContext";
@@ -61,6 +61,16 @@ const Login = () => {
   return (
     // Explicitly force layout to stack normally
     <div className="min-h-screen flex flex-col bg-gray-50"> 
+      {/* Back to Home Button */}
+      <div className="w-full max-w-7xl mx-auto px-6 pt-6 flex justify-start">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors"
+        >
+          <HiArrowLeft size={20} />
+          Back to Home
+        </Link>
+      </div>
 
       {/* This container will now perfectly occupy the rest of the height and center the card */}
       <div className="flex-1 flex items-center justify-center p-4">
